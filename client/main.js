@@ -1,6 +1,6 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 "use strict";
-// Transcrypt'ed from Python, 2018-07-14 01:03:38
+// Transcrypt'ed from Python, 2018-07-14 01:20:48
 function main () {
     var __symbols__ = ['__py3.6__', '__esv8__'];
     var __all__ = {};
@@ -2204,15 +2204,16 @@ function main () {
 					var Authentication = __class__ ('Authentication', [GenericInterface], {
 						__module__: __name__,
 						get __init__ () {return __get__ (this, function (self) {
-							GenericInterface.__init__ (self, dict ({'events': list (['ready', 'login', 'logout'])}));
+							GenericInterface.__init__ (self, dict ({'events': list (['login', 'logout'])}));
 							self.__start__ ();
 						});},
 						get getCurrentUser () {return __get__ (this, function (self) {
 							return firebase.auth ().currentUser;
 						});},
 						get __onAuthStateChanged () {return __get__ (this, function (self) {
-							if (self.getCurrentUser ()) {
-								self.event ('login').trigger ();
+							var user = self.getCurrentUser ();
+							if (user) {
+								self.event ('login').trigger (user);
 							}
 							else {
 								self.event ('logout').trigger ();
@@ -2220,7 +2221,15 @@ function main () {
 						});},
 						get __start__ () {return __get__ (this, function (self) {
 							firebase.auth ().onAuthStateChanged (self.__onAuthStateChanged);
-							self.event ('ready').trigger ();
+						});},
+						get login () {return __get__ (this, async function (self) {
+							var provider = new firebase.auth.GoogleAuthProvider ();
+							try {
+								var result = await firebase.auth ().signInWithPopup (provider);
+							}
+							catch (__except0__) {
+								// pass;
+							}
 						});},
 						get logout () {return __get__ (this, async function (self) {
 							firebase.auth ().signOut ();
@@ -2238,7 +2247,6 @@ function main () {
 			}
 		}
 	);
-
 	__nest__ (
 		__all__,
 		'util.event', {
@@ -2303,9 +2311,12 @@ function main () {
 							self.events = dict ({});
 							for (var each of events) {
 								self.events [each] = Event ();
-								self.events [each].append ((function __lambda__ () {
-									return console.log ('Event [{}] triggered by {}'.format (each, self.__class__.__name__));
-								}));
+								self.events [each].append ((function __lambda__ (a, b) {
+									return (function __lambda__ () {
+										var c = tuple ([].slice.apply (arguments).slice (0));
+										return console.log ('Event [{}] triggered by {}'.format (a, b), c);
+									});
+								}) (each, self.__class__.__name__));
 							}
 						});}
 					});
@@ -2321,7 +2332,6 @@ function main () {
 			}
 		}
 	);
-
 	(function () {
 		var __name__ = '__main__';
 		var Authentication = __init__ (__world__.services.auth).Authentication;

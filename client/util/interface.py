@@ -14,9 +14,6 @@ class GenericInterface:
         self.events = {}
         for each in events:
             self.events[each] = Event()
-            self.events[each].append(lambda: console.log(
-                "Event [{}] triggered by {}".format(
-                    each,
-                    self.__class__.__name__
-                )
-            ))
+            self.events[each].append((lambda a,b: lambda *c: console.log(
+                "Event [{}] triggered by {}".format(a,b), c
+            ))(each, self.__class__.__name__))
