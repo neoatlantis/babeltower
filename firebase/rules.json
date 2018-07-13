@@ -1,0 +1,35 @@
+{
+    "rules": {
+        "$uid": {
+            "message-from": {
+                ".read": "auth != null && $uid === auth.uid",
+                "$sender": {
+                    ".write": "
+                        auth != null &&
+                        (auth.uid == $sender || auth.uid == $uid) &&
+                        root.child($uid).child('friendship-with').child($sender).child('blocked').val() != true
+                    ",
+                    "$key": {
+                        ".validate": "
+                            data.val() == null &&
+                            newData.isString() && newData.val().length < 5120
+                        "
+                    }
+                }
+            },
+            "public": {
+                ".read": "auth != null",
+                ".write": "auth != null && $uid === auth.uid"
+            },
+            "friendship-with": {
+                ".read": "auth != null && $uid === auth.uid",
+                ".write": "auth != null && $uid === auth.uid",
+                "$with": {
+                    "notice": { ".validate": "newData.isString() && newData.val().length < 30" },
+                    "blocked": { ".validate": "newData.isBoolean()" },
+                    "$_": { ".validate": false }
+                }
+            }
+        }
+    }
+}
